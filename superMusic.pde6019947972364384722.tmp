@@ -20,13 +20,12 @@ PGraphics p_graphics;
 ShapeHearts hearts = new ShapeHearts();
 ShapeFloor floor=new ShapeFloor();
 ShapeSun sun= new ShapeSun();
-ShapeStars star= new ShapeStars();
 
 float time=0;
 float vol;  //volume level of audio
 float volLeft;
 float volRight;
-float avgBPS=1;    //average beats per minute
+float avgBPM=1;    //average beats per minute
 int beatCount=1;
 int prevBeatCount=1;
 int secondChecked=0;  //the second() the beat was previously averaged on. Avoid averaging on same second
@@ -39,7 +38,6 @@ void setup(){
   hearts.InitGraphics(p_graphics);
   floor.InitGraphics(p_graphics);
   sun.InitGraphics(p_graphics);
-  star.InitGraphics(p_graphics);
   
   minim = new Minim(this);
   // use the getLineIn method of the Minim object to get an AudioInput
@@ -50,30 +48,28 @@ void setup(){
 }
 
 void draw(){
-  averageBPS();
-
-  vol=in.mix.level()+adjVol;  //volume level of audio
-  volLeft=in.left.level()+adjVol;
-  volRight=in.right.level()+adjVol;
-
-
+  
+  vol=in.mix.level();  //volume level of audio
+  volLeft=in.left.level();
+  volRight=in.right.level();
+  autoVolControl(vol);
+  
+  
   drawSun();
   drawHearts();
   drawFloor();
-  drawStars();
-  text(avgBPS,14,14);
-  autoVolControl(in.mix.level());
+
+  text(averageBPM(),14,14);
   
-  if (time>1000000) 
+  if (time>5.0) 
     time=0;
   time+=.01f;
-  delay(2);
+  delay(10);
 }
 
 void drawFloor(){
   floor.setDrawnShape();
-  image(floor.getDrawnShape(),floor.getPos().x, floor.getPos().y);
-}
+  image(floor.getDrawnShape(),floor.getPos().x, floor.getPos().y);;}
 
 
 void drawHearts(){
@@ -87,36 +83,29 @@ void drawSun(){
   image(sun.getDrawnShape(), sun.getPos().x,sun.getPos().y);
 }
 
-void drawStars(){
-  star.setDrawnShape();
-  image(star.getDrawnShape(),star.getPos().x,star.getPos().y);
-  
-}
-
-
-
-void averageBPS(){
+float averageBPM(){
 
   beat.detect(in.mix);
   if ( beat.isOnset() || beat.isKick() || beat.isHat()){
     beatCount++;
+    text(second(),4*beatCount,40);
   }
-  text(beatCount,14,40);
-  if ((int)second()%3==0&&secondChecked!=(int)second()){ //every five seconds take average
+    
+  if (second()%2==0&&secondChecked!=second()){ //every five seconds take average
     secondChecked=second();
-    avgBPS=beatCount/3;
+    avgBPM=(beatCount+prevBeatCount)/2;
+    prevBeatCount=beatCount;
     beatCount=0; //reset number of beats
   }
+    
+  return avgBPM;
 }
 
 
-float adjVol=0;
-void autoVolControl(float vol){    //automatic volume control, caps volume at a certain level (.05-.06 average)
-  text("before: " +vol,34,34);
-  if (vol+adjVol<.04)
-    adjVol=lerp(adjVol,.1,.006);
-  else
-  if (vol+adjVol>.04)
-    adjVol=lerp(adjVol,-.1,.006);
-  text("after: " +adjVol, 34,50);
+
+float autoVolControl(float vol){    //automatic volume control, caps volume at a certain level
+  
+  p_graphics.text(vol,34,34);
+  
+  return vol;
 }

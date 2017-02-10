@@ -21,18 +21,18 @@ class ShapeHearts extends Shapes{
 
     
     for (float t=0; t<=2*PI; t+=0.01){
-      vPos.x=(fft.getFreq(20)+1)*21*((3*sin(t)-sin(3*t))/4);  //sin cubed identity
-      vPos.y=(fft.getFreq(20)+1)*18*cos(t)-5*cos(2*t)-2*cos(3*t)-cos(4*t);
+      vPos.x=(fft.getFreq(100)*.3+.2)*18*((3*sin(t)-sin(3*t))/4);  //sin cubed identity
+      vPos.y=(fft.getFreq(100)*.3+.2)*15*cos(t)-5*cos(2*t)-2*cos(3*t)-cos(4*t);
       p_shape.vertex(vPos.x,-vPos.y);
     }
     
     p_shape.endShape();
     p_shape.endDraw();
     
-    if (pos.y>height){
+    if (pos.y<-height/2){
       pos.x=(int)random(width*1/8,width*7/8);
-      pos.y=-height/2;
-    }else pos.y+=3;
+      pos.y=height/2;
+    }else pos.y-=3;
   
   }
 };
